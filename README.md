@@ -13,9 +13,7 @@ This app allows you to:
 
 - [Features](#features)  
 - [Tech Stack](#tech-stack)  
-- [Installation](#installation)  
-- [Configuration](#configuration)  
-- [Running the App](#running-the-app)  
+- [Installation, Configuration & Running the App](#installation-configuration--running-the-app)  
 - [API Endpoints](#api-endpoints)  
 - [Postman Documentation](#postman-documentation)  
 - [Redis Caching](#redis-caching)  
@@ -43,10 +41,88 @@ This app allows you to:
 
 ---
 
-## Installation
-
-1. Clone the repository:
+## Installation, Configuration, Running & Everything
 
 ```bash
+# 1. Clone the repository
 git clone https://github.com/Balqeesqasem/url_shorting.git
 cd url_shorting
+
+# 2. Install dependencies
+bundle install
+
+# 3. Set up the database
+rails db:create
+rails db:migrate
+
+# 4. Ensure Redis is installed and running
+redis-server
+
+# 5. Redis configuration (default)
+# Redis URL for development: redis://localhost:6379/0
+# Rails caching is already enabled in config/environments/development.rb using RedisCacheStore
+# Optional: Adjust Redis memory and eviction policy in redis.conf
+# maxmemory 256mb
+# maxmemory-policy allkeys-lru
+
+# 6. Start the Rails server
+rails server
+
+# The app will run on:
+http://localhost:3000
+
+# -------------------------------------
+# API Endpoints
+# -------------------------------------
+
+# 1. Encode URL
+# POST /urls/encode
+
+# Body:
+{
+  "main_url": "https://www.example.com"
+}
+
+# Response:
+{
+  "short_url": "abcd123"
+}
+
+# 2. Decode URL
+# POST /urls/decode
+
+# Body:
+{
+  "short_code": "abcd123"
+}
+
+# Response:
+{
+  "original_url": "https://www.example.com"
+}
+
+# -------------------------------------
+# Postman Documentation
+# -------------------------------------
+
+# You can import the Postman collection here:
+Postman Docs
+
+# It contains all endpoints, request examples, and responses.
+
+# -------------------------------------
+# Redis Caching
+# -------------------------------------
+
+# URLs are cached after the first decode using Rails.cache.fetch
+# Redis LRU ensures hot URLs remain in memory and cold URLs are evicted automatically
+# TTL is set to 90 minutes
+
+# Verify cached keys
+redis-cli KEYS "url:decode:*"
+
+# -------------------------------------
+# License
+# -------------------------------------
+
+MIT License © 2025 Balqees Qasem
