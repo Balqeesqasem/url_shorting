@@ -6,7 +6,7 @@ class UrlsController < ApplicationController
     if url.persisted? || url.save
       render json: { short_url: url.short_code }, status: :ok
     else
-      render json: { errors: url.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: url.errors.full_messages }, status: :bad_request
     end
   end
 
