@@ -56,37 +56,37 @@ It contains:
 
 ## Installation, Configuration & Running
 
-# 1. Clone the repository:
+1. Clone the repository:
 
 ```bash
 git clone https://github.com/Balqeesqasem/url_shorting.git
 cd url_shorting
 ```
 
-# 2. Install dependencies
+2. Install dependencies
 ```bash
 bundle install
 ```
 
-# 3. Set up the database
+3. Set up the database
 ```bash
 rails db:create
 rails db:migrate
 ```
 
-# 4. Ensure Redis is installed and running
+4. Ensure Redis is installed and running
 ```bash
 redis-server
 ```
 
-# 5. Redis configuration (default)
+5. Redis configuration (default)
 # Redis URL for development: redis://localhost:6379/0
 # Rails caching is already enabled in config/environments/development.rb using RedisCacheStore
 # Optional: Adjust Redis memory and eviction policy in redis.conf
 # maxmemory 256mb
 # maxmemory-policy allkeys-lru
 
-# 6. Start the Rails server
+6. Start the Rails server
 ```bash
 rails server
 ```
