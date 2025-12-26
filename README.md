@@ -1,24 +1,146 @@
-# README
+# URL Shortening Service
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A **URL shortening application** built with **Ruby on Rails** and **Redis caching**.  
+This app allows you to:
 
-Things you may want to cover:
+- Encode long URLs into short codes.
+- Decode short codes back to the original URLs.
+- Cache decoded URLs in Redis with LRU eviction for high performance.
 
-* Ruby version
+---
 
-* System dependencies
+## Table of Contents
 
-* Configuration
+- [Features](#features)  
+- [Tech Stack](#tech-stack)  
+- [Installation](#installation)  
+- [Configuration](#configuration)  
+- [Running the App](#running-the-app)  
+- [API Endpoints](#api-endpoints)  
+- [Postman Documentation](#postman-documentation)  
+- [Redis Caching](#redis-caching)  
+- [License](#license)  
 
-* Database creation
+---
 
-* Database initialization
+## Features
 
-* How to run the test suite
+- Encode long URLs to short codes (`POST /urls/encode`)
+- Decode short codes to original URLs (`POST /urls/decode`)
+- Redis caching for fast decoding  
+- Automatic eviction of cold URLs using **Redis LRU**
+- Rails 7 API-only backend
+- Validations and error handling
 
-* Services (job queues, cache servers, search engines, etc.)
+---
 
-* Deployment instructions
+## Tech Stack
 
-* ...
+- **Backend:** Ruby on Rails 7.1  
+- **Database:** sqlite3  
+- **Cache:** Redis  
+- **API testing:** Postman  
+
+---
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/Balqeesqasem/url_shorting.git
+cd url_shorting
+Install dependencies:
+
+bash
+
+bundle install
+Set up the database:
+
+
+```bash
+rails db:create
+rails db:migrate
+Ensure Redis is installed and running:
+
+
+```bash
+redis-server
+Configuration
+Redis: By default, development uses redis://localhost:6379/0.
+
+Rails caching: Already enabled in development.rb with RedisCacheStore.
+
+You can adjust Redis memory and eviction policy in redis.conf:
+
+conf
+
+maxmemory 256mb
+maxmemory-policy allkeys-lru
+Running the App
+Start the Rails server:
+
+
+```bash
+rails server
+The app will run on http://localhost:3000.
+
+API Endpoints
+1. Encode URL
+POST /urls/encode
+
+Body:
+
+json
+
+{
+  "main_url": "https://www.example.com"
+}
+Response:
+
+json
+
+{
+  "short_url": "abcd123"
+}
+2. Decode URL
+POST /urls/decode
+
+Body:
+
+json
+
+{
+  "short_code": "abcd123"
+}
+Response:
+
+json
+
+{
+  "original_url": "https://www.example.com"
+}
+
+
+Postman Documentation
+You can import the Postman collection here:
+Postman Docs
+
+It contains all endpoints, request examples, and responses.
+
+Redis Caching
+URLs are cached after the first decode using Rails.cache.fetch.
+
+Redis LRU ensures hot URLs remain in memory and cold URLs are evicted automatically.
+
+TTL is set to 90 minutes.
+
+You can verify keys:
+
+```bash
+
+redis-cli KEYS "url:decode:*"
+
+
+License
+MIT License © 2025 Balqees Qasem
