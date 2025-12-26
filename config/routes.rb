@@ -7,4 +7,12 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  # Routes for URLs with encode and decode actions
+  resources :urls, only: [:create] do
+    collection do
+      post :encode   # POST /urls/encode
+      post :decode   # POST /urls/decode
+    end
+  end
 end

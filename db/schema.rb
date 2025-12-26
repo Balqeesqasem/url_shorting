@@ -13,7 +13,7 @@
 ActiveRecord::Schema[7.1].define(version: 2025_12_26_181515) do
   create_table "urls", force: :cascade do |t|
     t.string "main_url", null: false
-    t.string "short_code", null: false
+    t.string "short_code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["short_code"], name: "index_urls_on_short_code", unique: true
