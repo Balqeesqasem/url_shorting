@@ -17,18 +17,19 @@ This app allows you to:
 - [API Endpoints](#api-endpoints)  
 - [Postman Documentation](#postman-documentation)  
 - [Redis Caching](#redis-caching)  
+- [Testing](#testing)  
 - [License](#license)  
 
 ---
 
 ## Features
 
-- Encode long URLs to short codes (`POST /urls/encode`)
-- Decode short codes to original URLs (`POST /urls/decode`)
+- Encode long URLs to short codes (`POST /urls/encode`)  
+- Decode short codes to original URLs (`POST /urls/decode`)  
 - Redis caching for fast decoding  
-- Automatic eviction of cold URLs using **Redis LRU**
-- Rails 7 API-only backend
-- Validations and error handling
+- Automatic eviction of cold URLs using **Redis LRU**  
+- Rails 7 API-only backend  
+- Validations and error handling  
 
 ---
 
@@ -40,18 +41,20 @@ This app allows you to:
 - **API testing:** Postman  
 
 ---
+
 ## Postman Documentation
 
-You can import the Postman collection here: [Postman Docs](https://documenter.getpostman.com/view/11123143/2sAXjF7Zow)
+You can import the Postman collection here: [Postman Docs](https://documenter.getpostman.com/view/11123143/2sAXjF7Zow)  
 
 It contains:
 
-- All API endpoints
-- Request examples
-- Response examples
+- All API endpoints  
+- Request examples  
+- Response examples  
+
 ---
 
-## Installation, Configuration, Running 
+## Installation, Configuration & Running
 
 ```bash
 # 1. Clone the repository
@@ -80,66 +83,67 @@ rails server
 
 # The app will run on:
 http://localhost:3000
+API Endpoints
+1. Encode URL
+POST /urls/encode
 
+Body:
 
----
-## API Endpoints
-
-### 1. Encode URL
-
-**POST** `/urls/encode`
-
-**Body:**
-```json
+json
+Copy code
 {
   "main_url": "https://amazon.com"
 }
+Response:
 
-Response: 
-
-**Body:**
-```json
+json
+Copy code
 {
   "short_url": "https://tinyurl.com/tcs9"
 }
+2. Decode URL
+POST /urls/decode
 
-### 1. Decode URL
+Body:
 
-**POST** `/urls/decode`
-
-**Body:**
-```json
+json
+Copy code
 {
-  "main_url": "https://tinyurl.com/tcs9"
+  "short_code": "https://tinyurl.com/tcs9"
 }
+Response:
 
-Response: 
-
-**Body:**
-```json
+json
+Copy code
 {
-  "short_url": "https://amazon.com"
+  "original_url": "https://amazon.com"
 }
+Redis Caching
+URLs are cached after the first decode using Rails.cache.fetch
 
+Redis LRU ensures hot URLs remain in memory and cold URLs are evicted automatically
 
----
+TTL is set to 90 minutes
 
+Verify cached keys:
 
-
-# -------------------------------------
-# Redis Caching
-# -------------------------------------
-
-# URLs are cached after the first decode using Rails.cache.fetch
-# Redis LRU ensures hot URLs remain in memory and cold URLs are evicted automatically
-# TTL is set to 90 minutes
-
-# Verify cached keys
+bash
+Copy code
 redis-cli KEYS "url:decode:*"
+Testing
+This project uses RSpec to test both the model and API endpoints.
 
-# -------------------------------------
-# License
-# -------------------------------------
-
+Run All Tests
+bash
+Copy code
+bundle exec rspec
+Run Only Model Tests
+bash
+Copy code
+bundle exec rspec spec/models/url_spec.rb
+Run Only Controller / API Tests
+bash
+Copy code
+bundle exec rspec spec/requests/urls_spec.rb
+License
 MIT License © 2025 Balqees Qasem
-
