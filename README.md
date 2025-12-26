@@ -56,20 +56,28 @@ It contains:
 
 ## Installation, Configuration & Running
 
+# 1. Clone the repository:
+
 ```bash
-# 1. Clone the repository
 git clone https://github.com/Balqeesqasem/url_shorting.git
 cd url_shorting
+```
 
 # 2. Install dependencies
+```bash
 bundle install
+```
 
 # 3. Set up the database
+```bash
 rails db:create
 rails db:migrate
+```
 
 # 4. Ensure Redis is installed and running
+```bash
 redis-server
+```
 
 # 5. Redis configuration (default)
 # Redis URL for development: redis://localhost:6379/0
@@ -79,46 +87,64 @@ redis-server
 # maxmemory-policy allkeys-lru
 
 # 6. Start the Rails server
+```bash
 rails server
+```
+
 
 # The app will run on:
+```bash
 http://localhost:3000
-API Endpoints
+
+```
+
+## API Endpoints
+
 1. Encode URL
+
+```bash
 POST /urls/encode
+```
 
 Body:
 
-json
-Copy code
+```bash
 {
   "main_url": "https://amazon.com"
 }
+```
+
 Response:
 
-json
-Copy code
+```bash
 {
   "short_url": "https://tinyurl.com/tcs9"
 }
+
+```
 2. Decode URL
+
+```bash
 POST /urls/decode
+```
 
 Body:
 
-json
-Copy code
+```bash
 {
   "short_code": "https://tinyurl.com/tcs9"
 }
+```
+
 Response:
 
-json
-Copy code
+```bash
 {
   "original_url": "https://amazon.com"
 }
-Redis Caching
+```
+
+## Redis Caching
 URLs are cached after the first decode using Rails.cache.fetch
 
 Redis LRU ensures hot URLs remain in memory and cold URLs are evicted automatically
@@ -127,23 +153,30 @@ TTL is set to 90 minutes
 
 Verify cached keys:
 
-bash
-Copy code
+```bash
 redis-cli KEYS "url:decode:*"
-Testing
+```
+
+## Testing
 This project uses RSpec to test both the model and API endpoints.
 
-Run All Tests
-bash
-Copy code
+Run All Tests:
+
+```bash
 bundle exec rspec
+```
+
 Run Only Model Tests
-bash
-Copy code
+
+```bash
 bundle exec rspec spec/models/url_spec.rb
+```
+
 Run Only Controller / API Tests
-bash
-Copy code
+
+```bash
 bundle exec rspec spec/requests/urls_spec.rb
-License
+```
+
+## License
 MIT License © 2025 Balqees Qasem
