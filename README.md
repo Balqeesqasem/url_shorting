@@ -2,48 +2,39 @@
 
 A **URL shortening application** built with **Ruby on Rails** and **Redis caching**.  
 This app allows you to:
-
 - Encode long URLs into short codes.
-- Decode short codes back to the original URLs.
-- Cache decoded URLs in Redis with LRU eviction for high performance.
+- Decode short codes back to the original URL.
 
 ---
 
-## Table of Contents
+## API Endpoints
 
-- [Features](#features)  
-- [Tech Stack](#tech-stack)  
-- [Installation, Configuration & Running the App](#installation-configuration--running-the-app)  
-- [API Endpoints](#api-endpoints)  
-- [Postman Documentation](#postman-documentation)  
-- [Redis Caching](#redis-caching)  
-- [License](#license)  
+### 1. Encode URL
+**POST** `/urls/encode`  
+**Request Body:**
+{
+  "main_url": "https://amazon.com"
+}  
+**Response Body:**
+{
+  "short_url": "https://tinyurl.com/tcs9"
+}
 
----
-
-## Features
-
-- Encode long URLs to short codes (`POST /urls/encode`)
-- Decode short codes to original URLs (`POST /urls/decode`)
-- Redis caching for fast decoding  
-- Automatic eviction of cold URLs using **Redis LRU**
-- Rails 7 API-only backend
-- Validations and error handling
-
----
-
-## Tech Stack
-
-- **Backend:** Ruby on Rails 7.1  
-- **Database:** sqlite3  
-- **Cache:** Redis  
-- **API testing:** Postman  
+### 2. Decode URL
+**POST** `/urls/decode`  
+**Request Body:**
+{
+  "main_url": "https://tinyurl.com/tcs9"
+}  
+**Response Body:**
+{
+  "short_url": "https://amazon.com"
+}
 
 ---
 
-## Installation, Configuration, Running & Everything
+## Installation, Configuration, and Running
 
-```bash
 # 1. Clone the repository
 git clone https://github.com/Balqeesqasem/url_shorting.git
 cd url_shorting
@@ -60,7 +51,7 @@ redis-server
 
 # 5. Redis configuration (default)
 # Redis URL for development: redis://localhost:6379/0
-# Rails caching is already enabled in config/environments/development.rb using RedisCacheStore
+# Rails caching is enabled in config/environments/development.rb using RedisCacheStore
 # Optional: Adjust Redis memory and eviction policy in redis.conf
 # maxmemory 256mb
 # maxmemory-policy allkeys-lru
@@ -68,61 +59,19 @@ redis-server
 # 6. Start the Rails server
 rails server
 
-# The app will run on:
-http://localhost:3000
+# The app will run on: http://localhost:3000
 
-# -------------------------------------
-# API Endpoints
-# -------------------------------------
+---
 
-# 1. Encode URL
-# POST /urls/encode
-
-# Body:
-{
-  "main_url": "https://www.example.com"
-}
-
-# Response:
-{
-  "short_url": "abcd123"
-}
-
-# 2. Decode URL
-# POST /urls/decode
-
-# Body:
-{
-  "short_code": "abcd123"
-}
-
-# Response:
-{
-  "original_url": "https://www.example.com"
-}
-
-# -------------------------------------
-# Postman Documentation
-# -------------------------------------
-
-# You can import the Postman collection here:
-Postman Docs
-
-# It contains all endpoints, request examples, and responses.
-
-# -------------------------------------
-# Redis Caching
-# -------------------------------------
-
-# URLs are cached after the first decode using Rails.cache.fetch
-# Redis LRU ensures hot URLs remain in memory and cold URLs are evicted automatically
-# TTL is set to 90 minutes
+## Redis Caching
+- URLs are cached after the first decode using Rails.cache.fetch.
+- Redis LRU ensures hot URLs remain in memory and cold URLs are evicted automatically.
+- TTL is set to 90 minutes.
 
 # Verify cached keys
 redis-cli KEYS "url:decode:*"
 
-# -------------------------------------
-# License
-# -------------------------------------
+---
 
+## License
 MIT License © 2025 Balqees Qasem
