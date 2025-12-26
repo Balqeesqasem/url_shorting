@@ -80,11 +80,12 @@ redis-server
 ```
 
 5. Redis configuration (default)
-# Redis URL for development: redis://localhost:6379/0
-# Rails caching is already enabled in config/environments/development.rb using RedisCacheStore
-# Optional: Adjust Redis memory and eviction policy in redis.conf
-# maxmemory 256mb
-# maxmemory-policy allkeys-lru
+ Redis URL for development: redis://localhost:6379/0
+ Rails caching is already enabled in config/environments/development.rb using RedisCacheStore
+ Optional: Adjust Redis memory and eviction policy in redis.conf
+ maxmemory 256mb
+ maxmemory-policy allkeys-lru
+ 
 
 6. Start the Rails server
 ```bash
