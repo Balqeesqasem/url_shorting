@@ -1,78 +1,59 @@
 # syntax = docker/dockerfile:1
 
-# ---------------------------
-# Build stage
-# ---------------------------
-ARG RUBY_VERSION=3.2.2
-FROM ruby:$RUBY_VERSION-slim AS build
+# Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
+ARG RUBY_VERSION=3.0.2
+FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim as base
 
-# Set working directory
+# Rails app lives here
 WORKDIR /rails
 
-# Install dependencies for gems and Rails
+# Set production environment
+ENV RAILS_ENV="production" \
+    BUNDLE_DEPLOYMENT="1" \
+    BUNDLE_PATH="/usr/local/bundle" \
+    BUNDLE_WITHOUT="development"
+
+
+# Throw-away build stage to reduce size of final image
+FROM base as build
+
+# Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    git \
-    libvips pkg-config \
-    libsqlite3-dev \
-    libpq-dev \
-    nodejs \
-    yarn \
-    libssl-dev \
-    zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get install --no-install-recommends -y build-essential git libvips pkg-config
 
-# Set environment variables for Bundler
-ENV BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development:test" \
-    BUNDLE_DEPLOYMENT=1
-
-# Copy Gemfiles first to leverage Docker cache
+# Install application gems
 COPY Gemfile Gemfile.lock ./
-
-# Install gems
-RUN bundle install
+RUN bundle install && \
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
+    bundle exec bootsnap precompile --gemfile
 
 # Copy application code
 COPY . .
 
-# Precompile Bootsnap for faster boot
-RUN bundle exec bootsnap precompile --gemfile
+# Precompile bootsnap code for faster boot times
+RUN bundle exec bootsnap precompile app/ lib/
 
-# ---------------------------
-# Runtime stage
-# ---------------------------
-FROM ruby:$RUBY_VERSION-slim AS runtime
 
-WORKDIR /rails
+# Final stage for app image
+FROM base
 
-# Install runtime dependencies only
+# Install packages needed for deployment
 RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends \
-    curl \
-    libsqlite3-0 \
-    libvips \
-    nodejs \
-    yarn \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get install --no-install-recommends -y curl libsqlite3-0 libvips && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Copy gems from build stage
+# Copy built artifacts: gems, application
 COPY --from=build /usr/local/bundle /usr/local/bundle
-
-# Copy app code from build stage
 COPY --from=build /rails /rails
 
-# Create non-root user
+# Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
-    chown -R rails:rails /rails /usr/local/bundle /rails/tmp /rails/log /rails/storage /rails/db
+    chown -R rails:rails db log storage tmp
 USER rails:rails
 
-# Expose port
-EXPOSE 3000
-
-# Entrypoint (optional, adjust if you have your own)
+# Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Default command
-CMD ["./bin/rails", "server", "-b", "0.0.0.0"]
+# Start the server by default, this can be overwritten at runtime
+EXPOSE 3000
+CMD ["./bin/rails", "server"]
