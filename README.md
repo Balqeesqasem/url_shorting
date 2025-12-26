@@ -44,7 +44,7 @@ This app allows you to:
 
 ## Postman Documentation
 
-You can import the Postman collection here: [Postman Docs](https://documenter.getpostman.com/view/11123143/2sAXjF7Zow)  
+You can import the Postman collection here: [Postman Docs](https://documenter.getpostman.com/view/11123143/2sAXjF7Zowhttps://www.postman.com/grey-capsule-36807/workspace/url-shortening/request/11123143-097a0978-d0f4-40b9-9e8a-192d5c6f49de?action=share&creator=11123143&ctx=documentation)  
 
 It contains:
 
@@ -85,7 +85,7 @@ redis-server
  Optional: Adjust Redis memory and eviction policy in redis.conf
  maxmemory 256mb
  maxmemory-policy allkeys-lru
- 
+
 
 6. Start the Rails server
 ```bash
