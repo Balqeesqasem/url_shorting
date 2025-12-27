@@ -14,10 +14,11 @@ ENV RAILS_ENV="production" \
 # -------------------
 FROM base AS build
 
+# Install build dependencies
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
     build-essential git libvips pkg-config \
-    libsqlite3-dev libpq-dev nodejs yarn libssl-dev zlib1g-dev && \
+    libsqlite3-dev sqlite3 nodejs yarn libssl-dev zlib1g-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Install latest bundler
@@ -34,6 +35,11 @@ RUN bundle config set --local without 'development test' && \
 # Copy application code
 COPY . .
 
+# Create necessary directories and set permissions
+RUN mkdir -p tmp/pids tmp/sockets log && \
+    touch /rails/db/production.sqlite3 && \
+    chmod 0666 /rails/db/production.sqlite3
+
 # Precompile Bootsnap
 RUN bundle exec bootsnap precompile --gemfile app/ lib/
 
@@ -49,22 +55,28 @@ RUN if bundle exec rails -T | grep -q "^rake assets:precompile"; then \
 # -------------------
 FROM base AS runtime
 
+# Install runtime dependencies
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+    curl sqlite3 libsqlite3-0 libvips nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
 # Set production environment
 ENV RAILS_ENV=production
 ENV RACK_ENV=production
 ENV RAILS_SERVE_STATIC_FILES=true
 ENV RAILS_LOG_TO_STDOUT=true
-ENV SECRET_KEY_BASE=d0e6a2c3b9f84e1a5d7f8c0e2b4a6978f3c5d1e2a4b6c8d9e0f1a2b3c4d5e6f7
-
-# Install runtime dependencies
-RUN apt-get update -qq && \
-    apt-get install -y --no-install-recommends \
-    curl libsqlite3-0 libvips nodejs && \
-    rm -rf /var/lib/apt/lists/*
+ENV SECRET_KEY_BASE=${SECRET_KEY_BASE:-`rake secret`}
+ENV DATABASE_URL=sqlite3:/rails/db/${RAILS_ENV:-production}.sqlite3
 
 # Copy installed gems and application code
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
+
+# Create necessary directories and set permissions
+RUN mkdir -p /rails/tmp/pids /rails/tmp/sockets /rails/log /rails/db && \
+    touch /rails/db/production.sqlite3 && \
+    chmod 0666 /rails/db/production.sqlite3
 
 # Create a non-root user and set permissions
 RUN useradd rails --create-home --shell /bin/bash && \
@@ -73,11 +85,11 @@ RUN useradd rails --create-home --shell /bin/bash && \
 USER rails:rails
 WORKDIR /rails
 
+# Run database migrations
+RUN bundle exec rails db:create db:migrate
+
 # Expose port 3000 to the Docker host
 EXPOSE 3000
 
-# Use a script to handle environment variables and start the server
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
-
 # Start the main process
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+CMD ["/rails/bin/docker-entrypoint"]
