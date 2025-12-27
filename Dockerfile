@@ -37,9 +37,12 @@ COPY . .
 # Precompile Bootsnap
 RUN bundle exec bootsnap precompile --gemfile app/ lib/
 
-# Precompile assets
-RUN SECRET_KEY_BASE=dummy RAILS_ENV=production \
-    bundle exec rails assets:precompile
+# Precompile assets if the task exists
+RUN if bundle exec rails -T | grep -q "^rake assets:precompile"; then \
+      SECRET_KEY_BASE=dummy RAILS_ENV=production bundle exec rails assets:precompile; \
+    else \
+      echo "Skipping assets precompile - assets:precompile task not found"; \
+    fi
 
 # -------------------
 # Runtime stage
