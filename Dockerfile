@@ -1,7 +1,6 @@
 # syntax = docker/dockerfile:1
 
-ARG RUBY_VERSION=3.0.2
-FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim
+FROM ruby:3.2.2
 
 WORKDIR /rails
 ENV RAILS_ENV="production" \
