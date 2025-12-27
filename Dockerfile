@@ -66,8 +66,9 @@ ENV RAILS_ENV=production
 ENV RACK_ENV=production
 ENV RAILS_SERVE_STATIC_FILES=true
 ENV RAILS_LOG_TO_STDOUT=true
-ENV SECRET_KEY_BASE=${SECRET_KEY_BASE:-`rake secret`}
-ENV DATABASE_URL=sqlite3:/rails/db/${RAILS_ENV:-production}.sqlite3
+# Using a static secret key for now - replace with a secure secret in production
+ENV SECRET_KEY_BASE=your_secure_secret_key_here_1234567890
+ENV DATABASE_URL=sqlite3:/rails/db/production.sqlite3
 
 # Copy installed gems and application code
 COPY --from=build /usr/local/bundle /usr/local/bundle
