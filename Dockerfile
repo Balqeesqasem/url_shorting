@@ -50,11 +50,11 @@ RUN if bundle exec rails -T | grep -q "^rake assets:precompile"; then \
 FROM base AS runtime
 
 # Set production environment
-ENV RAILS_ENV=production \
-    RACK_ENV=production \
-    RAILS_SERVE_STATIC_FILES=true \
-    RAILS_LOG_TO_STDOUT=true \
-    SECRET_KEY_BASE=${SECRET_KEY_BASE:-`rake secret`}
+ENV RAILS_ENV=production
+ENV RACK_ENV=production
+ENV RAILS_SERVE_STATIC_FILES=true
+ENV RAILS_LOG_TO_STDOUT=true
+ENV SECRET_KEY_BASE=d0e6a2c3b9f84e1a5d7f8c0e2b4a6978f3c5d1e2a4b6c8d9e0f1a2b3c4d5e6f7
 
 # Install runtime dependencies
 RUN apt-get update -qq && \
