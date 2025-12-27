@@ -49,21 +49,35 @@ RUN if bundle exec rails -T | grep -q "^rake assets:precompile"; then \
 # -------------------
 FROM base AS runtime
 
+# Set production environment
+ENV RAILS_ENV=production \
+    RACK_ENV=production \
+    RAILS_SERVE_STATIC_FILES=true \
+    RAILS_LOG_TO_STDOUT=true \
+    SECRET_KEY_BASE=${SECRET_KEY_BASE:-`rake secret`}
+
+# Install runtime dependencies
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
     curl libsqlite3-0 libvips nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy installed gems from build stage
+# Copy installed gems and application code
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
 
-# Create a non-root user
+# Create a non-root user and set permissions
 RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails /rails /usr/local/bundle /rails/tmp /rails/log /rails/storage /rails/db
 
 USER rails:rails
+WORKDIR /rails
 
+# Expose port 3000 to the Docker host
 EXPOSE 3000
+
+# Use a script to handle environment variables and start the server
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+
+# Start the main process
 CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
